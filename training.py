@@ -20,11 +20,6 @@ from batch_dataset_from_parquet import batch_dataset_from_parquet
 
 epoch_size = 100000000
 
-train_batch_size = 8096
-validation_batch_size = train_batch_size*2
-
-log_interval = 250*2048//train_batch_size
-
 learning_rate = 0.01
 patience = 4
 lr_multiplier = 0.5
@@ -127,8 +122,12 @@ class EarlyStopping(IgniteEarlyStopping):
             self._save_state()    
             
 
-def run_training(model, data_dir, batch_dataload=False, num_workers=0, use_cuDF=False, use_GPU_RAM=False):
+def run_training(model, data_dir, batch_size=8096, batch_dataload=False, num_workers=0, use_cuDF=False, use_GPU_RAM=False):
     # Data
+    train_batch_size = batch_size
+    validation_batch_size = train_batch_size*2
+
+    log_interval = 250*2048//train_batch_size   
     out_dir = data_dir
     if batch_dataload:
         train_dataset = batch_dataset_from_parquet(os.path.join(out_dir, "train"), num_files=1,
